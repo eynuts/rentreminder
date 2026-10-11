@@ -12,14 +12,36 @@
         .inner-card { width: 100%; max-width: 1100px; background-color: #0c1728; border-radius: 12px; padding: 35px 45px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #162a45; position: relative; margin: auto; }
 
         /* Header / Nav */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; border-bottom: 1px solid #162a45; padding-bottom: 15px; }
-        .nav-links { display: flex; gap: 28px; }
-        .nav-item { color: #8da4be; text-decoration: none; font-size: 15px; font-weight: 600; cursor: pointer; padding-bottom: 8px; transition: color 0.2s ease; }
-        .nav-item:hover { color: #ffffff; }
-        .nav-item.active { color: #ffffff; border-bottom: 3px solid #ffffff; }
-        .search-box { position: relative; width: 200px; }
-        .search-box input { width: 100%; background-color: #070d18; border: 1px solid #162a45; border-radius: 6px; padding: 8px 35px 8px 12px; color: #ffffff; font-size: 13px; outline: none; }
-        .search-box i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #00b8de; font-size: 14px; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 10px 16px;
+            background: #070d18;
+            border: 1px solid #162a45;
+            border-radius: 10px;
+            gap: 12px;
+        }
+        .nav-links { display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
+        .nav-item {
+            color: #8da4be;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 11px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+        .nav-item:hover { color: #ffffff; background: #0c1728; border-color: #162a45; }
+        .nav-item.active { color: #00b8de; background: rgba(0,184,222,0.1); border-color: rgba(0,184,222,0.3); }
+        .search-box { position: relative; width: 150px; }
+        .search-box input { width: 100%; background-color: #0c1728; border: 1px solid #162a45; border-radius: 6px; padding: 6px 30px 6px 10px; color: #ffffff; font-size: 12px; outline: none; }
+        .search-box input:focus { border-color: #00b8de; }
+        .search-box i { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: #00b8de; font-size: 12px; }
 
         /* Landing / Dashboard */
         .main-content { display: grid; grid-template-columns: 1.2fr 0.9fr; gap: 40px; align-items: center; }
@@ -69,6 +91,8 @@
         .action-btn { background-color: #122138; color: #ffffff; border: 1px solid #243c5a; padding: 8px 14px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .action-btn.primary { background-color: #00b8de; color: #070d18; font-weight: 700; border: none; }
         .report-type-select { background-color: #091220; color: #00b8de; border: 1px solid #162a45; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; outline: none; }
+        .report-type-select option, select option { background-color: #0c1728; color: #ffffff; }
+        select { background-color: #091220; color: #ffffff; }
         .logs-table-wrapper { background-color: #070d18; border-radius: 0 0 8px 8px; border: 1px solid #162a45; overflow-x: auto; overflow-y: auto; max-height: 55vh; margin-bottom: 20px; }
         .logs-table-wrapper::-webkit-scrollbar { width: 5px; height: 5px; }
         .logs-table-wrapper::-webkit-scrollbar-track { background: #0c1728; }
@@ -169,10 +193,12 @@
             .summary-card { border: 1px solid #000 !important; background: #ffffff !important; }
             .summary-card h4 { color: #333 !important; }
             .summary-card input { color: #000 !important; }
-            .logs-table-wrapper { border: 1px solid #000 !important; background: #ffffff !important; }
-            .logs-table th { background: #f0f0f0 !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
+            .logs-table-wrapper { border: 1px solid #000 !important; background: #ffffff !important; max-height: none !important; overflow: visible !important; }
+            .logs-table th { background: #f0f0f0 !important; color: #000 !important; border-bottom: 2px solid #000 !important; position: static !important; }
             .logs-table td { color: #000 !important; border-bottom: 1px solid #ccc !important; }
             .editable-input { background: transparent !important; border: none !important; color: #000 !important; padding: 0 !important; }
+            .dueDateInfoBar, #dueDateInfoBar { display: none !important; }
+            .report-summary-cards { display: grid !important; }
         }
     </style>
 </head>
@@ -209,13 +235,39 @@
             <a class="nav-item" id="navMaintenance"  onclick="switchTab('maintenance')">Maintenance</a>
             <a class="nav-item" id="navSupport"      onclick="switchTab('support')">Support</a>
         </div>
-        <div style="display:flex;align-items:center;gap:16px;">
-            <span style="font-size:12px;color:#8da4be;">Welcome, <strong style="color:#fff;" id="navUserName"></strong></span>
+
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <!-- Welcome pill -->
+            <div style="display:flex;align-items:center;gap:7px;background:#0c1728;border:1px solid #162a45;border-radius:8px;padding:5px 10px;max-width:170px;">
+                <i class="fa-solid fa-circle-user" style="color:#00b8de;font-size:15px;flex-shrink:0;"></i>
+                <div style="line-height:1.25;min-width:0;">
+                    <div style="font-size:9px;color:#8da4be;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;">Logged in as</div>
+                    <div style="font-size:12px;font-weight:700;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="navUserName"></div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="width:1px;height:22px;background:#162a45;flex-shrink:0;"></div>
+
+            <!-- Search -->
             <div class="search-box">
                 <input type="text" id="globalSearch" placeholder="Search..." oninput="handleSearch(this.value)">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <a href="#" onclick="doLogout()" style="font-size:12px;color:#ff6b7a;text-decoration:none;white-space:nowrap;">
+
+            <!-- Settings — icon only -->
+            <a href="#" onclick="openModal('modalSettings')" title="Settings"
+                style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;color:#8da4be;text-decoration:none;background:#0c1728;border:1px solid #162a45;border-radius:6px;flex-shrink:0;transition:all 0.2s;"
+                onmouseover="this.style.color='#fff';this.style.borderColor='#243c5a';"
+                onmouseout="this.style.color='#8da4be';this.style.borderColor='#162a45';">
+                <i class="fa-solid fa-gear" style="font-size:12px;"></i>
+            </a>
+
+            <!-- Logout -->
+            <a href="#" onclick="doLogout()"
+                style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#ff6b7a;text-decoration:none;white-space:nowrap;background:rgba(220,53,69,0.08);border:1px solid rgba(220,53,69,0.25);border-radius:6px;padding:6px 10px;flex-shrink:0;transition:all 0.2s;"
+                onmouseover="this.style.background='rgba(220,53,69,0.18)';"
+                onmouseout="this.style.background='rgba(220,53,69,0.08)';">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </a>
         </div>
@@ -231,7 +283,6 @@
                 <p class="hero-text">Stay on top of your monthly rent, track due dates, and receive automated SMS and email notifications before your payment is due. Designed for effortless small-scale property management.</p>
                 <div class="icon-row">
                     <div class="icon-btn" title="Reminders"   onclick="switchTab('reminders')"><i class="fa-solid fa-bell"></i></div>
-                    <div class="icon-btn" title="Reports"     onclick="switchTab('reports')"><i class="fa-solid fa-file-invoice"></i></div>
                     <div class="icon-btn" title="Maintenance" onclick="switchTab('maintenance')"><i class="fa-solid fa-screwdriver-wrench"></i></div>
                     <div class="icon-btn" title="Support"     onclick="switchTab('support')"><i class="fa-solid fa-circle-question"></i></div>
                 </div>
@@ -285,6 +336,9 @@
             </div>
             <div class="action-bar">
                 <span class="status-badge-delivered" id="tenantCountBadge">0 Active Tenants</span>
+                <button class="action-btn primary" onclick="openModal('modalAddTenant')">
+                    <i class="fa-solid fa-user-plus"></i> Add Tenant
+                </button>
             </div>
         </div>
         <div class="logs-table-wrapper">
@@ -369,9 +423,40 @@
                     style="white-space:nowrap;">
                     <i class="fa-solid fa-bell"></i> Send Reminders
                 </button>
-                <button class="action-btn" onclick="addReportRow()"><i class="fa-solid fa-plus"></i> Add Row</button>
                 <button class="action-btn primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
             </div>
+        </div>
+
+        <!-- Period Filter Bar -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#091220;border:1px solid #162a45;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+            <i class="fa-solid fa-filter" style="color:#00b8de;font-size:13px;"></i>
+            <span style="font-size:12px;color:#8da4be;white-space:nowrap;">Filter by:</span>
+
+            <select id="filterPeriodType" onchange="onFilterTypeChange()"
+                style="background:#0c1728;border:1px solid #162a45;color:#fff;font-size:12px;font-weight:700;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;">
+                <option value="all">All Records</option>
+                <option value="yearly">Yearly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+
+            <!-- Year picker — shown for yearly and monthly -->
+            <select id="filterYear" onchange="applyReportFilter()" style="display:none;background:#0c1728;border:1px solid #162a45;color:#fff;font-size:12px;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;"></select>
+
+            <!-- Month picker — shown for monthly only -->
+            <select id="filterMonth" onchange="applyReportFilter()" style="display:none;background:#0c1728;border:1px solid #162a45;color:#fff;font-size:12px;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;">
+                <option value="1">January</option><option value="2">February</option>
+                <option value="3">March</option><option value="4">April</option>
+                <option value="5">May</option><option value="6">June</option>
+                <option value="7">July</option><option value="8">August</option>
+                <option value="9">September</option><option value="10">October</option>
+                <option value="11">November</option><option value="12">December</option>
+            </select>
+
+            <span id="filterResultCount" style="font-size:11px;color:#8da4be;margin-left:4px;"></span>
+
+            <button onclick="clearReportFilter()" style="margin-left:auto;background:transparent;border:1px solid #162a45;color:#8da4be;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i> Clear
+            </button>
         </div>
         <div class="report-summary-cards">
             <div class="summary-card"><h4>Total Active Tenants</h4><input type="text" id="sumTenants" value="—"></div>
@@ -482,6 +567,62 @@
 
 </div><!-- /.inner-card -->
 
+<!-- Settings / Change Password Modal -->
+<div class="modal-overlay" id="modalSettings">
+    <div class="modal-box" style="max-width:440px;">
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalSettings')"></i>
+        <div class="modal-title"><i class="fa-solid fa-gear"></i> Account Settings</div>
+        <div class="modal-desc">Change your password below. You must enter your current password to confirm.</div>
+
+        <div class="modal-form-group">
+            <label>Current Password</label>
+            <div style="position:relative;">
+                <input type="password" id="settingsCurrentPw" placeholder="Enter current password"
+                    style="width:100%;background:#070d18;border:1px solid #162a45;border-radius:4px;padding:10px 36px 10px 10px;color:#fff;font-size:13px;outline:none;">
+                <i class="fa-solid fa-eye" id="toggleCurrentPw" onclick="togglePwVisibility('settingsCurrentPw','toggleCurrentPw')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#8da4be;cursor:pointer;font-size:13px;"></i>
+            </div>
+        </div>
+
+        <div class="modal-form-group">
+            <label>New Password</label>
+            <div style="position:relative;">
+                <input type="password" id="settingsNewPw" placeholder="Enter new password"
+                    style="width:100%;background:#070d18;border:1px solid #162a45;border-radius:4px;padding:10px 36px 10px 10px;color:#fff;font-size:13px;outline:none;">
+                <i class="fa-solid fa-eye" id="toggleNewPw" onclick="togglePwVisibility('settingsNewPw','toggleNewPw')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#8da4be;cursor:pointer;font-size:13px;"></i>
+            </div>
+        </div>
+
+        <div class="modal-form-group">
+            <label>Confirm New Password</label>
+            <div style="position:relative;">
+                <input type="password" id="settingsConfirmPw" placeholder="Re-enter new password"
+                    style="width:100%;background:#070d18;border:1px solid #162a45;border-radius:4px;padding:10px 36px 10px 10px;color:#fff;font-size:13px;outline:none;">
+                <i class="fa-solid fa-eye" id="toggleConfirmPw" onclick="togglePwVisibility('settingsConfirmPw','toggleConfirmPw')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#8da4be;cursor:pointer;font-size:13px;"></i>
+            </div>
+        </div>
+
+        <!-- Strength indicator -->
+        <div id="pwStrengthBar" style="height:4px;border-radius:4px;background:#162a45;margin:-8px 0 16px;transition:all 0.3s;">
+            <div id="pwStrengthFill" style="height:100%;border-radius:4px;width:0%;transition:width 0.3s,background 0.3s;"></div>
+        </div>
+        <div id="pwStrengthLabel" style="font-size:11px;color:#8da4be;margin-top:-12px;margin-bottom:16px;"></div>
+
+        <div style="display:flex;gap:10px;margin-top:8px;">
+            <button onclick="closeModal('modalSettings')"
+                style="flex:1;background:#122138;color:#fff;border:1px solid #243c5a;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+                Cancel
+            </button>
+            <button onclick="changePassword()"
+                style="flex:2;background:#00b8de;color:#070d18;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+                <i class="fa-solid fa-key"></i> Update Password
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Register Modal -->
 <div class="modal-overlay" id="modalRegister">
     <div class="modal-box">
@@ -523,6 +664,50 @@
     </div>
 </div>
 
+<!-- Add Tenant Modal -->
+<div class="modal-overlay" id="modalAddTenant">
+    <div class="modal-box" style="max-width:460px;">
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalAddTenant')"></i>
+        <div class="modal-title"><i class="fa-solid fa-user-plus"></i> Add Tenant</div>
+        <div class="modal-desc">Fill in the details to register a new tenant. They can log in using their email and password.</div>
+        <div class="modal-form-group">
+            <label>Full Name</label>
+            <input type="text" id="addTenantName" placeholder="e.g. Juan Dela Cruz">
+        </div>
+        <div class="modal-form-group">
+            <label>Room No.</label>
+            <input type="text" id="addTenantRoom" placeholder="e.g. Room 12">
+        </div>
+        <div class="modal-form-group">
+            <label>Contact No.</label>
+            <input type="text" id="addTenantContact" placeholder="e.g. 09XX XXX XXXX">
+        </div>
+        <div class="modal-form-group">
+            <label>Email Address</label>
+            <input type="email" id="addTenantEmail" placeholder="name@example.com">
+        </div>
+        <div class="modal-form-group">
+            <label>Monthly Rent Amount (₱)</label>
+            <input type="number" id="addTenantAmount" placeholder="e.g. 3500" min="0" step="0.01"
+                style="background:#070d18;border:1px solid #162a45;border-radius:4px;padding:10px;color:#fff;font-size:13px;outline:none;width:100%;">
+        </div>
+        <div class="modal-form-group">
+            <label>Password</label>
+            <div style="position:relative;">
+                <input type="password" id="addTenantPassword" placeholder="Set login password"
+                    style="width:100%;background:#070d18;border:1px solid #162a45;border-radius:4px;padding:10px 36px 10px 10px;color:#fff;font-size:13px;outline:none;">
+                <i class="fa-solid fa-eye" id="toggleAddTenantPw"
+                    onclick="togglePwVisibility('addTenantPassword','toggleAddTenantPw')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#8da4be;cursor:pointer;font-size:13px;"></i>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button onclick="closeModal('modalAddTenant')" style="flex:1;background:#122138;color:#fff;border:1px solid #243c5a;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">Cancel</button>
+            <button onclick="addTenant()" style="flex:2;background:#00b8de;color:#070d18;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;"><i class="fa-solid fa-user-plus"></i> Add Tenant</button>
+        </div>
+    </div>
+</div>
+
 <!-- Edit Tenant Modal -->
 <div class="modal-overlay" id="modalEditTenant">
     <div class="modal-box" style="max-width:460px;">
@@ -550,6 +735,16 @@
             <label>Monthly Rent Amount (₱)</label>
             <input type="number" id="editTenantAmount" placeholder="e.g. 3500" min="0" step="0.01"
                 style="background:#070d18;border:1px solid #162a45;border-radius:4px;padding:10px;color:#fff;font-size:13px;outline:none;width:100%;">
+        </div>
+        <div class="modal-form-group">
+            <label>Password <span style="color:#8da4be;font-weight:400;">(current password shown)</span></label>
+            <div style="position:relative;">
+                <input type="password" id="editTenantPassword" placeholder="Password"
+                    style="width:100%;background:#070d18;border:1px solid #162a45;border-radius:4px;padding:10px 36px 10px 10px;color:#fff;font-size:13px;outline:none;">
+                <i class="fa-solid fa-eye" id="toggleEditTenantPw"
+                    onclick="togglePwVisibility('editTenantPassword','toggleEditTenantPw')"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#8da4be;cursor:pointer;font-size:13px;"></i>
+            </div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px;">
             <button onclick="closeModal('modalEditTenant')" style="flex:1;background:#122138;color:#fff;border:1px solid #243c5a;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">Cancel</button>
@@ -666,12 +861,13 @@ function showLoggedInState(user) {
 
 // ── Login ────────────────────────────────────────────────────
 window.doLogin = async function() {
-    const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const password = document.getElementById('loginPassword').value;
-    const remember = document.getElementById('rememberMe').checked;
-    const btn      = document.getElementById('loginBtn');
-    const errBox   = document.getElementById('loginError');
-    const errText  = document.getElementById('loginErrorText');
+    const email      = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password   = document.getElementById('loginPassword').value;
+    const remember   = document.getElementById('rememberMe').checked;
+    const btn        = document.getElementById('loginBtn');
+    const errBox     = document.getElementById('loginError');
+    const errText    = document.getElementById('loginErrorText');
+    const isAdminTab = document.getElementById('btnAdmin').classList.contains('active');
 
     errBox.classList.remove('show');
 
@@ -685,7 +881,6 @@ window.doLogin = async function() {
     btn.innerHTML = '<span class="spinner"></span>Signing in...';
 
     try {
-        // Fetch all users and match client-side — no index required
         const snap = await get(ref(db, 'users'));
 
         if (!snap.exists()) {
@@ -702,6 +897,23 @@ window.doLogin = async function() {
 
         if (!matchedUser) {
             throw new Error('wrong_password');
+        }
+
+        // Check role matches the selected tab
+        const isAdminRole = matchedUser.role === 'landlord' || matchedUser.role === 'admin';
+        if (isAdminTab && !isAdminRole) {
+            errText.textContent = 'This account is not an admin. Please use the Tenant tab.';
+            errBox.classList.add('show');
+            btn.disabled = false;
+            btn.innerHTML = 'Access Portal';
+            return;
+        }
+        if (!isAdminTab && isAdminRole) {
+            errText.textContent = 'This is an admin account. Please use the Landlord / Admin tab.';
+            errBox.classList.add('show');
+            btn.disabled = false;
+            btn.innerHTML = 'Access Portal';
+            return;
         }
 
         saveSession(matchedUser, remember);
@@ -741,19 +953,33 @@ window.doLogout = function() {
 // ── Load all data from Realtime DB ───────────────────────────
 async function loadAllData(user) {
     const isAdmin = user.role === 'landlord' || user.role === 'admin';
+    // Reset filter cache so fresh data is loaded
+    window._allPaymentsData = null;
+    window._allTenantsData  = null;
     try {
-        const [tenantsSnap, paymentsSnap, remindersSnap, maintenanceSnap] = await Promise.all([
+        const [tenantsSnap, paymentsSnap, remindersSnap, maintenanceSnap, usersSnap] = await Promise.all([
             get(ref(db, 'tenants')),
             get(ref(db, 'payments')),
             get(ref(db, 'reminders')),
-            get(ref(db, 'maintenance'))
+            get(ref(db, 'maintenance')),
+            get(ref(db, 'users'))
         ]);
 
+        // Build full_name → password map from /users (more reliable than email matching)
+        const pwMap = {};
+        if (usersSnap.exists()) {
+            usersSnap.forEach(child => {
+                const u = child.val();
+                if (u.full_name) pwMap[u.full_name.trim().toLowerCase()] = u.password || '';
+            });
+        }
+
         if (isAdmin) {
-            renderTenants(tenantsSnap.val());
-            renderPayments(paymentsSnap.val(), tenantsSnap.val());
-            renderReminders(remindersSnap.val(), tenantsSnap.val());
-            renderMaintenance(maintenanceSnap.val(), tenantsSnap.val());
+            // Use /users directly for tenant table (has password + all fields in one place)
+            renderTenants(usersSnap.val());
+            renderPayments(paymentsSnap.val(), usersSnap.val());
+            renderReminders(remindersSnap.val(), usersSnap.val());
+            renderMaintenance(maintenanceSnap.val(), usersSnap.val());
 
             // Load due schedule and auto-check reminders
             const schedule = await loadDueSchedule();
@@ -784,7 +1010,7 @@ async function loadAllData(user) {
 }
 
 // ── Render: Tenants ──────────────────────────────────────────
-function renderTenants(data) {
+function renderTenants(data, pwMap = {}) {
     const tbody = document.getElementById('tenantTableBody');
     if (!data) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No tenants found.</td></tr>';
@@ -792,30 +1018,54 @@ function renderTenants(data) {
         return;
     }
 
-    const entries = Object.entries(data);
+    // Filter to tenants only from /users
+    const entries = Object.entries(data).filter(([k, u]) => u.role === 'tenant');
     document.getElementById('tenantCountBadge').textContent = entries.length + ' Active Tenants';
+
+    if (!entries.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No tenants found.</td></tr>';
+        return;
+    }
 
     tbody.innerHTML = entries.map(([key, t]) => `
         <tr>
-            <td>${esc(t.full_name)}</td>
+            <td>${esc(t.full_name || '—')}</td>
             <td>${esc(t.unit_number || '—')}</td>
             <td>${esc(t.mobile_number || '—')}</td>
             <td>${esc(t.email || '—')}</td>
             <td><span class="status-badge-delivered">Active</span></td>
             <td>
-                <button onclick="openEditTenantModal('${key}', ${JSON.stringify({full_name: t.full_name, unit_number: t.unit_number||'', mobile_number: t.mobile_number||'', email: t.email||'', monthly_rent: t.monthly_rent||0}).replace(/"/g,'&quot;')})"
+                <div style="display:flex;gap:6px;">
+                <button onclick="openEditTenantModal('${key}', ${JSON.stringify({
+                    full_name:     t.full_name     || '',
+                    unit_number:   t.unit_number   || '',
+                    mobile_number: t.mobile_number || '',
+                    email:         t.email         || '',
+                    monthly_rent:  t.monthly_rent  || 0,
+                    password:      t.password      || ''
+                }).replace(/"/g,'&quot;')})"
                     style="background:rgba(0,184,222,0.12);color:#00b8de;border:1px solid rgba(0,184,222,0.35);padding:5px 12px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;">
                     <i class="fa-solid fa-pen"></i> Edit
                 </button>
+                <button onclick="deleteTenant('${key}', '${esc(t.full_name || '')}')"
+                    style="background:rgba(220,53,69,0.12);color:#ff6b7a;border:1px solid rgba(220,53,69,0.35);padding:5px 12px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                </div>
             </td>
         </tr>
     `).join('');
 }
 
 // ── Render: Payments / Reports ───────────────────────────────
-function renderPayments(data, tenantsData) {
+function renderPayments(data, tenantsData, skipCache = false) {
     const tbody = document.getElementById('reportTbody');
-    if (!data) {
+
+    // Cache full dataset only on initial load, never from filter calls
+    if (!skipCache) {
+        window._allPaymentsData = data;
+        window._allTenantsData  = tenantsData;
+    }    if (!data) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No payment records found.</td></tr>';
         updateSummaryCards([], tenantsData);
         return;
@@ -867,6 +1117,8 @@ function updateSummaryCards(payments, tenantsData) {
     document.getElementById('sumCollections').value = '₱' + totalCollected.toLocaleString('en-PH', {minimumFractionDigits:2});
     document.getElementById('sumEfficiency').value  = efficiency + '%';
 }
+// Expose renderPayments to non-module scripts for filter use
+window.renderPayments = renderPayments;
 
 // ── Render: Tenant's own payment card ───────────────────────
 function renderTenantMyPayment(data, user) {
@@ -1038,8 +1290,8 @@ window.saveMarkPaid = async function() {
 
         // Send receipt email via PHP
         const p = window._markPaidData || {};
-        // Always look up tenant email from /tenants node by matching full_name
-        const tenantsSnap = await get(ref(db, 'tenants'));
+        // Look up tenant email from /users by matching full_name
+        const tenantsSnap = await get(ref(db, 'users'));
         let tenantEmail = '';
         let amountDue   = p.amount_due || 3500;
 
@@ -1047,7 +1299,7 @@ window.saveMarkPaid = async function() {
             tenantsSnap.forEach(child => {
                 const t = child.val();
                 if ((t.full_name || '').trim() === (p.full_name || p.tenant_name || '').trim()) {
-                    tenantEmail = t.email       || '';
+                    tenantEmail = t.email        || '';
                     amountDue   = t.monthly_rent || amountDue;
                 }
             });
@@ -1085,6 +1337,54 @@ window.saveMarkPaid = async function() {
     }
 };
 
+// ── Change Password ───────────────────────────────────────────
+window.changePassword = async function() {
+    const currentPw = document.getElementById('settingsCurrentPw').value;
+    const newPw     = document.getElementById('settingsNewPw').value;
+    const confirmPw = document.getElementById('settingsConfirmPw').value;
+    const u         = loadSession();
+
+    if (!currentPw || !newPw || !confirmPw) {
+        window.showToast('Please fill in all fields.', '⚠️', 'Missing Fields');
+        return;
+    }
+    if (currentPw !== u.password) {
+        window.showToast('Current password is incorrect.', '❌', 'Wrong Password');
+        return;
+    }
+    if (newPw.length < 6) {
+        window.showToast('New password must be at least 6 characters.', '⚠️', 'Too Short');
+        return;
+    }
+    if (newPw !== confirmPw) {
+        window.showToast('New passwords do not match.', '❌', 'Mismatch');
+        return;
+    }
+    if (newPw === currentPw) {
+        window.showToast('New password must be different from current.', '⚠️', 'Same Password');
+        return;
+    }
+
+    try {
+        // Update in /users node
+        await update(ref(db, `users/${u.key}`), { password: newPw });
+
+        // Update session
+        u.password = newPw;
+        const remember = !!localStorage.getItem('ramadia_user');
+        saveSession(u, remember);
+
+        closeModal('modalSettings');
+        document.getElementById('settingsCurrentPw').value = '';
+        document.getElementById('settingsNewPw').value     = '';
+        document.getElementById('settingsConfirmPw').value = '';
+        window.showToast('Password updated successfully.', '✅', 'Password Changed');
+    } catch (err) {
+        window.showToast('Failed to update password.', '❌', 'Error');
+        console.error(err);
+    }
+};
+
 // ── Mark Payment as Unpaid ───────────────────────────────────
 window.markUnpaid = function(key) {
     window._confirmAction(
@@ -1106,20 +1406,87 @@ window.markUnpaid = function(key) {
     );
 };
 
+// ── Add Tenant ────────────────────────────────────────────────
+window.addTenant = async function() {
+    const full_name     = document.getElementById('addTenantName').value.trim();
+    const unit_number   = document.getElementById('addTenantRoom').value.trim();
+    const mobile_number = document.getElementById('addTenantContact').value.trim();
+    const email         = document.getElementById('addTenantEmail').value.trim();
+    const monthly_rent  = parseFloat(document.getElementById('addTenantAmount').value) || 0;
+    const password      = document.getElementById('addTenantPassword').value.trim();
+
+    if (!full_name)  { window.showToast('Full name is required.', '⚠️', 'Missing Field'); return; }
+    if (!email)      { window.showToast('Email is required.', '⚠️', 'Missing Field'); return; }
+    if (!password)   { window.showToast('Password is required.', '⚠️', 'Missing Field'); return; }
+    if (password.length < 6) { window.showToast('Password must be at least 6 characters.', '⚠️', 'Too Short'); return; }
+
+    try {
+        await push(ref(db, 'users'), {
+            full_name, unit_number, mobile_number,
+            email, monthly_rent, password,
+            role: 'tenant'
+        });
+
+        // Auto-create a payment record for the new tenant in /payments
+        const now      = new Date();
+        const billing  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+        const label    = now.toLocaleString('en-PH', { month: 'short', year: 'numeric' });
+        await push(ref(db, 'payments'), {
+            full_name,
+            unit_number,
+            billing_month:  billing,
+            billing_label:  label,
+            amount_due:     monthly_rent || 0,
+            payment_status: 'Pending',
+            paid_date:      null
+        });
+        closeModal('modalAddTenant');
+        // Clear fields
+        ['addTenantName','addTenantRoom','addTenantContact','addTenantEmail','addTenantAmount','addTenantPassword']
+            .forEach(id => document.getElementById(id).value = '');
+        window.showToast(`${full_name} has been added.`, '✅', 'Tenant Added');
+        window._loadAllData();
+    } catch (err) {
+        window.showToast('Failed to add tenant.', '❌', 'Error');
+        console.error(err);
+    }
+};
+
+// ── Delete Tenant ─────────────────────────────────────────────
+window.deleteTenant = function(key, name) {
+    window._confirmAction(
+        `Delete ${name}? This will permanently remove their account.`,
+        async () => {
+            try {
+                await remove(ref(db, `users/${key}`));
+                window.showToast(`${name} has been removed.`, '✅', 'Deleted');
+                window._loadAllData();
+            } catch (err) {
+                window.showToast('Failed to delete tenant.', '❌', 'Error');
+                console.error(err);
+            }
+        },
+        'Delete'
+    );
+};
+
 // ── Edit Tenant ───────────────────────────────────────────────
 window.openEditTenantModal = function(key, t) {
-    document.getElementById('editTenantKey').value     = key;
-    document.getElementById('editTenantName').value    = t.full_name      || '';
-    document.getElementById('editTenantRoom').value    = t.unit_number    || '';
-    document.getElementById('editTenantContact').value = t.mobile_number  || '';
-    document.getElementById('editTenantEmail').value   = t.email          || '';
-    document.getElementById('editTenantAmount').value  = t.monthly_rent   || '';
+    document.getElementById('editTenantKey').value      = key;
+    document.getElementById('editTenantName').value     = t.full_name     || '';
+    document.getElementById('editTenantRoom').value     = t.unit_number   || '';
+    document.getElementById('editTenantContact').value  = t.mobile_number || '';
+    document.getElementById('editTenantEmail').value    = t.email         || '';
+    document.getElementById('editTenantAmount').value   = t.monthly_rent  || '';
+    document.getElementById('editTenantPassword').value = t.password      || '';
     openModal('modalEditTenant');
 };
 
 window.saveTenantEdit = async function() {
-    const key     = document.getElementById('editTenantKey').value;
-    const amount  = parseFloat(document.getElementById('editTenantAmount').value) || 0;
+    const key    = document.getElementById('editTenantKey').value;
+    const amount = parseFloat(document.getElementById('editTenantAmount').value) || 0;
+    const newPw  = document.getElementById('editTenantPassword').value.trim();
+
     const payload = {
         full_name:     document.getElementById('editTenantName').value.trim(),
         unit_number:   document.getElementById('editTenantRoom').value.trim(),
@@ -1127,6 +1494,7 @@ window.saveTenantEdit = async function() {
         email:         document.getElementById('editTenantEmail').value.trim(),
         monthly_rent:  amount,
     };
+    if (newPw) payload.password = newPw;
 
     if (!payload.full_name) {
         window.showToast('Full name is required.', '⚠️', 'Missing Field');
@@ -1134,23 +1502,21 @@ window.saveTenantEdit = async function() {
     }
 
     try {
-        await update(ref(db, `tenants/${key}`), payload);
+        // Save everything directly to /users/{key}
+        await update(ref(db, `users/${key}`), payload);
 
-        // Update amount_due in ALL matching payment records for this tenant
+        // Update amount_due in matching payment records
         if (amount > 0) {
             const paymentsSnap = await get(ref(db, 'payments'));
             if (paymentsSnap.exists()) {
                 const updates = {};
                 paymentsSnap.forEach(child => {
                     const v = child.val();
-                    const name = (v.full_name || v.tenant_name || '').trim();
-                    if (name === payload.full_name.trim()) {
+                    if ((v.full_name || v.tenant_name || '').trim() === payload.full_name.trim()) {
                         updates[`payments/${child.key}/amount_due`] = amount;
                     }
                 });
-                if (Object.keys(updates).length) {
-                    await update(ref(db, '/'), updates);
-                }
+                if (Object.keys(updates).length) await update(ref(db, '/'), updates);
             }
         }
 
@@ -1255,7 +1621,7 @@ async function sendReminderEmails(schedule, dueDate, isManual = true) {
 
     try {
         const [tenantsSnap, paymentsSnap] = await Promise.all([
-            get(ref(db, 'tenants')),
+            get(ref(db, 'users')),
             get(ref(db, 'payments'))
         ]);
 
@@ -1330,12 +1696,53 @@ window.sendRemindersNow = async function() {
 // ── Mark ticket as resolved ──────────────────────────────────
 window.markTicketResolved = async function(key) {
     try {
+        const dateResolved = new Date().toISOString().slice(0,10);
         await update(ref(db, `maintenance/${key}`), {
             status:        'Resolved',
-            date_resolved: new Date().toISOString().slice(0,10)
+            date_resolved: dateResolved
         });
+
         window.showToast('Ticket marked as completed.', '✅', 'Completed');
         window._loadAllData();
+
+        // Send email notification to tenant
+        const ticketSnap = await get(ref(db, `maintenance/${key}`));
+        if (ticketSnap.exists()) {
+            const m = ticketSnap.val();
+            // Look up tenant email from /users by full_name
+            const tenantsSnap = await get(ref(db, 'users'));
+            let tenantEmail = '';
+            if (tenantsSnap.exists()) {
+                tenantsSnap.forEach(child => {
+                    const t = child.val();
+                    if ((t.full_name||'').trim() === (m.full_name||m.tenant_name||'').trim()) {
+                        tenantEmail = t.email || '';
+                    }
+                });
+            }
+            if (tenantEmail) {
+                fetch('send_maintenance.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email:         tenantEmail,
+                        full_name:     m.full_name    || m.tenant_name || '',
+                        unit_number:   m.unit_number  || '',
+                        category:      m.category     || '',
+                        description:   m.description  || '',
+                        status:        'Resolved',
+                        date_reported: m.date_reported || '',
+                        date_resolved: dateResolved
+                    })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) console.log('Maintenance email sent to', tenantEmail);
+                    else console.warn('Maintenance email failed:', res.message);
+                })
+                .catch(err => console.warn('Maintenance email error:', err));
+            }
+        }
     } catch (err) {
         window.showToast('Failed to update ticket.', '❌', 'Error');
         console.error(err);
@@ -1425,6 +1832,47 @@ function switchTab(tabId) {
     document.getElementById(navId)?.classList.add('active');
 }
 
+function togglePwVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+// Password strength checker
+document.addEventListener('input', function(e) {
+    if (e.target.id !== 'settingsNewPw') return;
+    const val   = e.target.value;
+    const fill  = document.getElementById('pwStrengthFill');
+    const label = document.getElementById('pwStrengthLabel');
+    if (!fill || !label) return;
+
+    let strength = 0;
+    if (val.length >= 6)                        strength++;
+    if (val.length >= 10)                       strength++;
+    if (/[A-Z]/.test(val))                      strength++;
+    if (/[0-9]/.test(val))                      strength++;
+    if (/[^A-Za-z0-9]/.test(val))              strength++;
+
+    const levels = [
+        { pct: '0%',   color: '#162a45', text: '' },
+        { pct: '25%',  color: '#ff6b7a', text: 'Weak' },
+        { pct: '50%',  color: '#ffc107', text: 'Fair' },
+        { pct: '75%',  color: '#00b8de', text: 'Good' },
+        { pct: '100%', color: '#28a745', text: 'Strong' },
+    ];
+    const lvl = val.length === 0 ? levels[0] : levels[Math.min(strength, 4)];
+    fill.style.width      = lvl.pct;
+    fill.style.background = lvl.color;
+    label.textContent     = lvl.text;
+    label.style.color     = lvl.color;
+});
+
 function setRole(role) {
     document.getElementById('btnTenant').classList.toggle('active', role === 'Tenant');
     document.getElementById('btnAdmin').classList.toggle('active', role === 'Landlord / Admin');
@@ -1472,6 +1920,68 @@ function showToast(msg, icon = '✅', title = 'Success') {
     openModal('modalSuccess');
 }
 window.showToast = showToast;
+
+// ── Report Period Filter ──────────────────────────────────────
+// Cache all payment data for filtering
+window._allPaymentsData   = null;
+window._allTenantsData    = null;
+
+(function initReportFilter() {
+    const yearSel = document.getElementById('filterYear');
+    const now = new Date();
+    for (let y = 2020; y <= 2035; y++) {
+        const o = document.createElement('option');
+        o.value = y; o.textContent = y;
+        if (y === now.getFullYear()) o.selected = true;
+        yearSel.appendChild(o);
+    }
+    document.getElementById('filterMonth').value = now.getMonth() + 1;
+})();
+
+function onFilterTypeChange() {
+    const type = document.getElementById('filterPeriodType').value;
+    document.getElementById('filterYear').style.display  = type !== 'all' ? '' : 'none';
+    document.getElementById('filterMonth').style.display = type === 'monthly' ? '' : 'none';
+    applyReportFilter();
+}
+
+function applyReportFilter() {
+    if (!window._allPaymentsData) return;
+
+    const type  = document.getElementById('filterPeriodType').value;
+    const year  = parseInt(document.getElementById('filterYear').value);
+    const month = parseInt(document.getElementById('filterMonth').value);
+
+    // Filter the cached payments data
+    const allEntries = Object.entries(window._allPaymentsData);
+    let filtered = {};
+
+    allEntries.forEach(([key, p]) => {
+        const bm = p.billing_month || ''; // e.g. "2026-09-01"
+        if (!bm) { if (type === 'all') filtered[key] = p; return; }
+        const d  = new Date(bm);
+        const rY = d.getFullYear();
+        const rM = d.getMonth() + 1;
+
+        if      (type === 'all')     filtered[key] = p;
+        else if (type === 'yearly'  && rY === year)              filtered[key] = p;
+        else if (type === 'monthly' && rY === year && rM === month) filtered[key] = p;
+    });
+
+    // Re-render table and update summary cards with filtered data — skip cache
+    if (window.renderPayments) {
+        window.renderPayments(Object.keys(filtered).length ? filtered : null, window._allTenantsData, true);
+    }
+
+    const count = Object.keys(filtered).length;
+    const label = document.getElementById('filterResultCount');
+    label.textContent = type !== 'all' ? `${count} record(s) found` : '';
+}
+
+function clearReportFilter() {
+    document.getElementById('filterPeriodType').value = 'all';
+    onFilterTypeChange();
+}
 
 function toggleReportType() {
     const mode = document.getElementById('reportMode').value;
